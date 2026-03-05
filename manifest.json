@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "FocusTrace",
+  "version": "3.2.0",
+  "description": "Eye-tracking focus analytics powered by MediaPipe FaceMesh.",
+  "permissions": ["storage"],
+  "background": {
+    "service_worker": "background/sw.js"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "sandbox": {
+    "pages": ["tracker/sandbox.html"]
+  },
+  "content_security_policy": {
+    "sandbox": "sandbox allow-scripts; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net"
+  }
+}

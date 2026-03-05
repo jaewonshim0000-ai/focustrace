@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+<div class="hd">
+  <div class="hd-row">
+    <div class="logo"><div class="logo-ic">◎</div><div class="logo-t">Focus<b>Trace</b></div></div>
+    <span class="ver">v3.2</span>
+  </div>
+  <div class="st"><div class="st-dot" id="dot"></div><div class="st-txt" id="stTxt">IDLE</div></div>
+</div>
+<div class="body">
+  <div class="idle" id="vIdle">
+    <div class="idle-ic">👁️</div>
+    <div class="idle-t">Eye-Tracking Focus</div>
+    <div class="idle-d">Track your attention in real-time using your camera. All processing is local.</div>
+    <button class="btn btn-go" id="btnLaunch">◎ Launch Tracker</button>
+    <button class="btn btn-sm" id="btnLast" style="display:none">View Last Session</button>
+  </div>
+  <div class="live" id="vLive">
+    <div class="live-score"><div class="live-num" id="lScore">—</div><div class="live-lbl">Focus Score</div></div>
+    <div class="live-row">
+      <div class="lm"><div class="lm-v" id="lTime">0:00</div><div class="lm-l">Duration</div></div>
+      <div class="lm"><div class="lm-v" id="lRead">0</div><div class="lm-l">Readings</div></div>
+      <div class="lm"><div class="lm-v" id="lTrig">0</div><div class="lm-l">Triggers</div></div>
+    </div>
+    <div class="bars">
+      <div class="bar-row"><span class="bar-n">Gaze</span><div class="bar-track"><div class="bar-fill" id="bGaze" style="background:#6366f1"></div></div><span class="bar-v" id="vGaze">0</span></div>
+      <div class="bar-row"><span class="bar-n">Eyes</span><div class="bar-track"><div class="bar-fill" id="bEyes" style="background:#22c55e"></div></div><span class="bar-v" id="vEyes">0</span></div>
+      <div class="bar-row"><span class="bar-n">Head</span><div class="bar-track"><div class="bar-fill" id="bHead" style="background:#06b6d4"></div></div><span class="bar-v" id="vHead">0</span></div>
+    </div>
+    <button class="btn btn-sm" id="btnOpen">Open Tracker Tab ↗</button>
+  </div>
+  <div class="res" id="vRes">
+    <div class="res-hd"><div class="res-t">Session Complete</div><div class="res-pill" id="rPill"></div><div class="res-pdesc" id="rPdesc"></div></div>
+    <div class="res-stats" id="rStats"></div>
+    <div class="ins-list" id="rIns"></div>
+    <div class="btn-row">
+      <button class="btn btn-sm" id="btnExp">Export</button>
+      <button class="btn btn-go" id="btnNewP" style="font-size:12px;padding:9px">New Session</button>
+    </div>
+  </div>
+  <div class="priv">🛡️ All processing local via MediaPipe · No video stored</div>
+</div>
+<script src="popup.js"></script>
+</body>
+</html>

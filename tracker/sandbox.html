@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>FaceMesh Worker</title></head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/face_mesh.js" crossorigin="anonymous"></script>
+<script>
+// This sandboxed page ONLY runs MediaPipe FaceMesh.
+// It receives ImageBitmap frames from the parent extension page,
+// processes them, and returns raw landmark coordinates.
+
+let faceMesh = null;
+let ready = false;
+let processing = false;
+
+async function init() {
+  try {
+    faceMesh = new FaceMesh({
+      locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/${f}`
+    });
+
+    faceMesh.setOptions({
+      maxNumFaces: 1,
+      refineLandmarks: true,
+      minDetectionConfidence: 0.5,
+      minTrackingConfidence: 0.5
+    });
+
+    faceMesh.onResults(onResults);
+
+    // Warm up with a blank canvas to trigger WASM load
+    const warmup = new OffscreenCanvas(64, 64);
+    const wctx = warmup.getContext('2d');
+    wctx.fillRect(0, 0, 64, 64);
+    const bmp = warmup.transferToImageBitmap();
+    await faceMesh.send({ image: bmp });
+    bmp.close();
+
+    ready = true;
+    parent.postMessage({ type: 'ready' }, '*');
+  } catch (err) {
+    parent.postMessage({ type: 'error', message: err.message }, '*');
+  }
+}
+
+function onResults(results) {
+  processing = false;
+  if (!results.multiFaceLandmarks || results.multiFaceLandmarks.length === 0) {
+    parent.postMessage({ type: 'noface' }, '*');
+    return;
+  }
+  // Send flat landmark array (x,y,z for each point) — much faster than full objects
+  const lm = results.multiFaceLandmarks[0];
+  const count = lm.length;
+  const flat = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    flat[i * 3] = lm[i].x;
+    flat[i * 3 + 1] = lm[i].y;
+    flat[i * 3 + 2] = lm[i].z;
+  }
+  parent.postMessage({ type: 'landmarks', count, data: flat.buffer }, '*', [flat.buffer]);
+}
+
+// Receive frames from parent
+window.addEventListener('message', async (e) => {
+  if (!e.data) return;
+
+  if (e.data.type === 'frame' && ready && !processing) {
+    processing = true;
+    try {
+      await faceMesh.send({ image: e.data.bitmap });
+    } catch (err) {
+      processing = false;
+    }
+    // Close the bitmap to free memory
+    if (e.data.bitmap && typeof e.data.bitmap.close === 'function') {
+      e.data.bitmap.close();
+    }
+  }
+});
+
+init();
+</script>
+</body>
+</html>

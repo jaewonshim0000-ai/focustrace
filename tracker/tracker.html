@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FocusTrace — Eye Tracker</title>
+  <link rel="stylesheet" href="tracker.css">
+</head>
+<body>
+  <div id="gaze"></div>
+
+  <!-- Calibration Overlay -->
+  <div class="cal-ov" id="calOv">
+    <div class="cal-header">
+      <div class="cal-logo">◎</div>
+      <h2 class="cal-title">Gaze Calibration</h2>
+      <p class="cal-desc" id="calDesc">Look at the dot and click it. Stay still while looking.</p>
+      <div class="cal-progress-wrap">
+        <div class="cal-progress-bar"><div class="cal-progress-fill" id="calFill"></div></div>
+        <span class="cal-progress-text mono" id="calProgress">0 / 9</span>
+      </div>
+    </div>
+    <div class="cal-point" id="calPoint">
+      <div class="cal-ring"></div>
+      <div class="cal-dot"></div>
+      <div class="cal-pulse"></div>
+    </div>
+    <div class="cal-collecting" id="calCollecting">
+      <div class="cal-collect-spinner"></div>
+      <span>Sampling gaze...</span>
+    </div>
+    <div class="cal-done" id="calDone">
+      <div class="cal-done-icon">✅</div>
+      <h3>Calibration Complete</h3>
+      <p class="cal-done-desc" id="calDoneDesc">Accuracy: —</p>
+      <div class="cal-done-btns">
+        <button class="btn btn-sec" id="btnRecal">↻ Recalibrate</button>
+        <button class="btn btn-go" id="btnCalDone">Continue →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app">
+    <div class="top">
+      <div class="logo">
+        <div class="logo-m">◎</div>
+        <h1>Focus<b>Trace</b></h1>
+      </div>
+      <div class="top-r">
+        <div class="cal-badge" id="calBadge" style="display:none">
+          <span class="cal-badge-dot"></span>
+          <span id="calBadgeText">Not calibrated</span>
+        </div>
+        <div class="badge off" id="badge">LOADING...</div>
+        <button class="btn btn-cal" id="btnCalibrate" style="display:none">◎ Calibrate</button>
+        <button class="btn btn-go" id="btnStart" disabled>▶ Start Session</button>
+        <button class="btn btn-stop" id="btnStop" style="display:none">■ End Session</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="cam">
+        <div class="cam-wrap">
+          <video id="vid" autoplay playsinline muted></video>
+          <canvas id="ov"></canvas>
+          <div class="init-ov" id="initOv">
+            <div>
+              <div class="spinner"></div>
+              <div id="initMsg">Initializing camera &amp; face model...</div>
+            </div>
+          </div>
+        </div>
+        <div class="cam-bar">
+          <div class="cdot" id="camDot"></div>
+          <span class="clbl" id="camLbl">Loading...</span>
+        </div>
+      </div>
+
+      <div class="data">
+        <div class="card score-card">
+          <div class="score-big mono" id="scoreBig">&mdash;</div>
+          <div class="score-lbl">Focus Score</div>
+          <div class="score-bar"><div class="score-fill" id="scoreFill"></div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-t"><div class="cd" style="background:var(--ac)"></div>Session</div>
+          <div class="met-row">
+            <div class="met"><div class="met-v mono" id="mTime">0:00</div><div class="met-l">Duration</div></div>
+            <div class="met"><div class="met-v mono" id="mFrames">0</div><div class="met-l">Frames</div></div>
+            <div class="met"><div class="met-v mono lo" id="mTrigs">0</div><div class="met-l">Unfocus</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-t"><div class="cd" style="background:var(--cy)"></div>Signals</div>
+          <div class="sig-row"><span class="sig-n">Gaze Center</span><div class="sig-track"><div class="sig-fill" id="sGaze" style="background:var(--ac)"></div></div><span class="sig-v mono" id="svGaze">&mdash;</span></div>
+          <div class="sig-row"><span class="sig-n">Eyes Open</span><div class="sig-track"><div class="sig-fill" id="sEyes" style="background:var(--gn)"></div></div><span class="sig-v mono" id="svEyes">&mdash;</span></div>
+          <div class="sig-row"><span class="sig-n">Head Facing</span><div class="sig-track"><div class="sig-fill" id="sHead" style="background:var(--cy)"></div></div><span class="sig-v mono" id="svHead">&mdash;</span></div>
+          <div class="sig-row"><span class="sig-n">Iris Position</span><div class="sig-track"><div class="sig-fill" id="sIris" style="background:var(--am)"></div></div><span class="sig-v mono" id="svIris">&mdash;</span></div>
+          <div class="sig-row"><span class="sig-n">Cal. Accuracy</span><div class="sig-track"><div class="sig-fill" id="sCal" style="background:var(--purple,#a855f7)"></div></div><span class="sig-v mono" id="svCal">&mdash;</span></div>
+        </div>
+
+        <div class="card">
+          <div class="card-t"><div class="cd" style="background:var(--am)"></div>Events</div>
+          <div class="log" id="log"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Overlay -->
+  <div class="res-ov" id="resOv">
+    <div class="res-box">
+      <div class="res-hero">
+        <h2>Session Analysis</h2>
+        <div class="res-pill" id="resPill"></div>
+        <div class="res-pdesc" id="resPdesc"></div>
+      </div>
+      <div class="res-stats" id="resStats"></div>
+      <div class="res-cal" id="resCal"></div>
+      <div class="res-tl">
+        <div class="card-t"><div class="cd" style="background:var(--ac)"></div>Focus Timeline</div>
+        <canvas id="tlCanvas"></canvas>
+      </div>
+      <div class="res-ins" id="resIns"></div>
+      <div class="res-btns">
+        <button class="btn btn-sec" id="btnExport">↗ Export JSON</button>
+        <button class="btn btn-go" id="btnNew">◎ New Session</button>
+      </div>
+      <div class="res-priv">🛡️ All processing local via MediaPipe · No video stored</div>
+    </div>
+  </div>
+
+  <!-- Sandbox: runs MediaPipe in relaxed CSP context -->
+  <iframe id="sandbox" src="sandbox.html" style="display:none" sandbox="allow-scripts"></iframe>
+
+  <!-- All logic in external file (CSP compliant) -->
+  <script src="tracker.js"></script>
+</body>
+</html>
